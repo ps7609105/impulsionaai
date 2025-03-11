@@ -28,6 +28,9 @@ export const createPanel = new Elysia()
 
     set.status = 'Created';
   }, {
+    detail: {
+      tags: ['Panel'],
+    },
     body: t.Object({
       email: t.String({ format: 'email' }),
       password: t.String({ minLength: 8 }),

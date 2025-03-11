@@ -12,6 +12,9 @@ const app = new Elysia()
         title: 'Impulsiona Aí',
         version: '1.0.0',
       },
+      tags: [
+        { name: 'Panel', description: 'Panel endpoints' },
+      ],
     },
   }))
   .use(createPanel);
