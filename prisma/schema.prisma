@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,189 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Panel {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  apiKey   String  @default(uuid())
+
+  settings Setting?
+  services Service[]
+  payments Payment[]
+  tickets  Ticket[]
+  users    User[]
+  orders   Order[]
+  refills  Refill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("panels")
+}
+
+model Setting {
+  id     String  @id @default(uuid())
+  name   String
+  slogan String?
+  domain String  @unique
+  slug   String  @unique
+
+  panel   Panel  @relation(fields: [panelId], references: [id])
+  panelId String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String
+
+  services Service[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+enum ServiceTypes {
+  DEFAULT
+  CUSTOM_COMMENTS
+  CUSTOM_COMMENTS_PACKAGE
+  COMMENT_LIKES
+}
+
+model Service {
+  id          Int          @id @default(autoincrement())
+  name        String
+  type        ServiceTypes @default(DEFAULT)
+  cancellable Boolean      @default(false)
+  refillable  Boolean      @default(false)
+  rate        Float
+  minimum     Int
+  maximum     Int
+
+  orders Order[]
+
+  Panel      Panel    @relation(fields: [panelId], references: [id])
+  panelId    String
+  Category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("services")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+model Payment {
+  id     Int           @id @default(autoincrement())
+  amount Int
+  status PaymentStatus @default(PENDING)
+
+  Panel   Panel  @relation(fields: [panelId], references: [id])
+  panelId String
+  User    User   @relation(fields: [userId], references: [id])
+  userId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payments")
+}
+
+model Ticket {
+  id Int @id @default(autoincrement())
+
+  Panel   Panel  @relation(fields: [panelId], references: [id])
+  panelId String
+  User    User   @relation(fields: [userId], references: [id])
+  userId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tickets")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String?
+  email    String  @unique
+  password String
+  balance  Float   @default(0.0)
+  apiKey   String  @default(uuid())
+
+  payments Payment[]
+  tickets  Ticket[]
+  orders   Order[]
+
+  Panel   Panel  @relation(fields: [panelId], references: [id])
+  panelId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  PARTIALIZED
+  CANCELED
+  PROCESSING
+  FAILED
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  quantity   Int
+  link       String
+  charge     Float?
+  startCount Int?
+  finalCount Int?
+  status     OrderStatus @default(PENDING)
+  remains    Int?
+
+  refills Refill[]
+
+  Panel     Panel   @relation(fields: [panelId], references: [id])
+  panelId   String
+  User      User    @relation(fields: [userId], references: [id])
+  userId    String
+  Service   Service @relation(fields: [serviceId], references: [id])
+  serviceId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("orders")
+}
+
+model Refill {
+  id Int @id @default(autoincrement())
+
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId Int
+  Panel   Panel  @relation(fields: [panelId], references: [id])
+  panelId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("refills")
 }
