@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
+import { createPanel } from './routes/panels/createPanel';
 
 const app = new Elysia()
   .use(cors())
@@ -12,7 +13,8 @@ const app = new Elysia()
         version: '1.0.0',
       },
     },
-  }));
+  }))
+  .use(createPanel);
 
 app.listen(process.env.PORT!, () => {
   console.log('HTTP server running!');
