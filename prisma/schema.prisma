@@ -8,10 +8,10 @@ datasource db {
 }
 
 model Panel {
-  id       String @id @default(uuid())
-  email    String @unique
-  password String
-  apiKey   String  @default(uuid())
+  id           String @id @default(uuid())
+  email        String @unique
+  passwordHash String
+  apiKey       String @default(uuid())
 
   settings Setting?
   services Service[]
@@ -123,12 +123,12 @@ model Ticket {
 }
 
 model User {
-  id       String  @id @default(uuid())
-  name     String?
-  email    String  @unique
-  password String
-  balance  Float   @default(0.0)
-  apiKey   String  @default(uuid())
+  id           String  @id @default(uuid())
+  name         String?
+  email        String  @unique
+  passwordHash String
+  balance      Float   @default(0.0)
+  apiKey       String  @default(uuid())
 
   payments Payment[]
   tickets  Ticket[]
